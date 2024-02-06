@@ -1,0 +1,16 @@
+# Untracked directories
+```
+__pycache__/
+node_modules/
+```
+
+# Untracked files
+```
+token.json
+credentials.json
+emailWatcher.log
+config.cfg
+```
+
+
+
