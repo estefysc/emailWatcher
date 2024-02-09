@@ -3,7 +3,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 from tunnel.actions import startNgrok
 from gmail.actions import Actions
 from messages.whatsapp.send_whats import WhatsApp
-from server.actions import shutdown_flask, monitor_shutdown_flag, generate_new_secret_key, createSessionObjects
+from server.actions import shutdown_flask, monitor_shutdown_flag, generate_new_secret_key
 
 import threading
 import time
@@ -20,7 +20,6 @@ app = Flask(__name__)
 @app.route("/", methods=['GET', 'POST'])
 def bot():
     userId = request.values.get('From', None)
-    createSessionObjects(userId)
     gmail = Actions.get_instance()
     # creating response object - TwiML response object
     response = MessagingResponse()
