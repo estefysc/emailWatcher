@@ -3,7 +3,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 from tunnel.actions import startNgrok
 from gmail.actions import Actions
 from messages.whatsapp.send_whats import WhatsApp
-from server.actions import shutdown_flask, monitor_shutdown_flag, generate_new_secret_key
+from server.actions import ServerManager
 
 import threading
 import time
@@ -19,6 +19,7 @@ app = Flask(__name__)
 # Whatsapp Bot actions
 @app.route("/", methods=['GET', 'POST'])
 def bot():
+    server_manager = ServerManager.get_server_instance()
     userId = request.values.get('From', None)
     gmail = Actions.get_instance()
     # creating response object - TwiML response object
@@ -40,7 +41,7 @@ def bot():
             # TODO: get this into the logger
             print('Deleting session key: ' + key)
             session.pop(key)
-        shutdown_flask()
+        server_manager.shutdown_flask()
     else:
         match userResponse:
             case '1':
@@ -61,7 +62,8 @@ def bot():
     return str(response)
 
 def runApp():
-    app.secret_key = generate_new_secret_key()
+    server_manager = ServerManager.get_server_instance()
+    app.secret_key = server_manager.generate_new_secret_key()
     app.run(port=8000, debug=False)
     
 def initProcess():
@@ -95,6 +97,8 @@ if __name__ == '__main__':
     # Create and configure logger
     logging.basicConfig(filename='emailWatcher.log', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
     logger = logging.getLogger('emailWatcher')
+    ServerManager.init_server_manager()
+    server_manager = ServerManager.get_server_instance()
 
     # Start ngrok tunnel
     #TODO: should I return proc or create a class and make it a property?
@@ -103,7 +107,7 @@ if __name__ == '__main__':
     # Create threads
     appThread = threading.Thread(target=runApp)
     initProcessThread = threading.Thread(target=initProcess)
-    monitorThread = threading.Thread(target=monitor_shutdown_flag, args=(logger,))
+    monitorThread = threading.Thread(target=server_manager.monitor_shutdown_flag, args=(logger,))
 
     # Start Flask app
     appThread.start()
