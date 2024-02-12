@@ -10,16 +10,14 @@ class ServerManager:
     _manager_instance = None
     _lock = threading.Lock()
 
-    def __init__(self):
-        self.shutdown_flask_flag = False
-
-    @classmethod
-    def init_server_manager(cls):
+    def __new__(cls, *args, **kwargs):
         with cls._lock:
             if cls._manager_instance is None:
-                cls._manager_instance = ServerManager()
-            else:
-                print('Server manager already exists')
+                cls._manager_instance = super().__new__(cls, *args, **kwargs)
+            return cls._manager_instance
+
+    def __init__(self):
+        self.shutdown_flask_flag = False
 
     @classmethod
     def get_server_instance(cls):
