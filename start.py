@@ -4,6 +4,8 @@ from tunnel.actions import startNgrok
 from gmail.actions import Actions
 from messages.whatsapp.send_whats import WhatsApp
 from server.actions import ServerManager
+from server.sessionManager import SessionManager  
+from assistants.whatsAssistant import WhatsAssistant
 
 import threading
 import time
@@ -20,12 +22,30 @@ app = Flask(__name__)
 @app.route("/", methods=['GET', 'POST'])
 def bot():
     server_manager = ServerManager.get_server_instance()
+    session_manager = SessionManager.get_session_manager_instance()
     userId = request.values.get('From', None)
     gmail = Actions.get_instance()
     # creating response object - TwiML response object
     response = MessagingResponse()
     # user input
     userResponse = request.values.get('Body', '').lower()
+
+    assistanId = session_manager.checkIfAgentInSession(userId)
+    assistantThreadId = session_manager.getAssistantThreadIdFromSession(userId)
+    
+    # This block is for testing purposes only
+    if assistanId is None:
+        print("No assistant found for this user.")
+    else:
+        print("Assistant found for this user.")
+
+    assistant = WhatsAssistant("Email Watcher Assistant")
+    # This block is for testing purposes only
+    assistant.deleteAllAssistants()
+    assistantResponse = assistant.startInteraction(userId, session_manager)
+    print(assistantResponse)
+    # for post request
+    # assistantResponse = assistant.processUserInput(user_input, assistanId, assistantThreadId)
 
      # Check if the user is in the process of deleting specific emails
     if session.get(userId) == 'deleting_specific_emails':
@@ -97,8 +117,7 @@ if __name__ == '__main__':
     # Create and configure logger
     logging.basicConfig(filename='emailWatcher.log', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
     logger = logging.getLogger('emailWatcher')
-    ServerManager.init_server_manager()
-    server_manager = ServerManager.get_server_instance()
+    server_manager = ServerManager()
 
     # Start ngrok tunnel
     #TODO: should I return proc or create a class and make it a property?
