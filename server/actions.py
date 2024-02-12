@@ -7,7 +7,7 @@ from flask import session
 from tunnel.actions import closeNgrokConnection, getNgrokPid
 
 class ServerManager:
-    _server_instance = None
+    _manager_instance = None
     _lock = threading.Lock()
 
     def __init__(self):
@@ -16,14 +16,14 @@ class ServerManager:
     @classmethod
     def init_server_manager(cls):
         with cls._lock:
-            if cls._server_instance is None:
-                cls._server_instance = ServerManager()
+            if cls._manager_instance is None:
+                cls._manager_instance = ServerManager()
             else:
                 print('Server manager already exists')
 
     @classmethod
     def get_server_instance(cls):
-        return cls._server_instance
+        return cls._manager_instance
     
     def shutdown_flask(self):
         self.shutdown_flask_flag = True
