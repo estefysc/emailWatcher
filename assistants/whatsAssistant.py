@@ -5,7 +5,7 @@ class WhatsAssistant(BaseAssistant):
         instruction = "You are a helpful assistant specialized in managing an email account."
         assistantId = self._createAssistant(instruction)
         sessionManager.addAssistantIdToSession(userId, assistantId)
-        userMessage = "Greet me as this is the first time that you are talking to me."
+        userMessage = "Welcome me to the application."
         threadId = self._createThread(userMessage)
         sessionManager.addOriginalAssistantThreadIdToSession(userId, threadId)
         run = self._triggerAssistant(threadId, assistantId)

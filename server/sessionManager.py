@@ -30,7 +30,7 @@ class SessionManager:
 
     def createSessionObjects(self, userId):
         self.__createAgentsSessionObjects()
-        # self.__checkUserIdInSession(userId)
+        self.__checkUserIdInSession(userId)
         self.__createThreadSessionObjects()
 
     def checkIfAgentInSession(self, userId):
@@ -60,17 +60,11 @@ class SessionManager:
         else:
             print("originalAssistantThread already in session.")
 
-        if 'originalSupervisorThread' not in session:
-            print("originalSupervisorThread not in session. Creating object..")
-            session['originalSupervisorThread'] = {}
-        else:
-            print("originalSupervisorThread already in session.")
-
-    def __checkIfAssistantExistsInSession(self, userId):
-        assistantId = None
-        if 'assistants' in session and userId in session['assistants']:
-            assistantId = session['assistants'][userId]
-        return assistantId
+    # def __checkIfAssistantExistsInSession(self, userId):
+    #     assistantId = None
+    #     if 'assistants' in session and userId in session['assistants']:
+    #         assistantId = session['assistants'][userId]
+    #     return assistantId
 
     def __checkUserIdInSession(self, userId):
             if 'user' not in session:

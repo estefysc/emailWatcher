@@ -21,40 +21,26 @@ app = Flask(__name__)
 # Whatsapp Bot actions
 @app.route("/", methods=['GET', 'POST'])
 def bot():
-    server_manager = ServerManager.get_server_instance()
-    session_manager = SessionManager.get_session_manager_instance()
-    userId = request.values.get('From', None)
-    gmail = Actions.get_instance()
     # creating response object - TwiML response object
     response = MessagingResponse()
-    # user input
-    userResponse = request.values.get('Body', '').lower()
-
-    assistanId = session_manager.checkIfAgentInSession(userId)
-    assistantThreadId = session_manager.getAssistantThreadIdFromSession(userId)
-    
-    # This block is for testing purposes only
-    if assistanId is None:
-        print("No assistant found for this user.")
-    else:
-        print("Assistant found for this user.")
-
     assistant = WhatsAssistant("Email Watcher Assistant")
     # This block is for testing purposes only
-    assistant.deleteAllAssistants()
-    assistantResponse = assistant.startInteraction(userId, session_manager)
-    print(assistantResponse)
-    # for post request
-    # assistantResponse = assistant.processUserInput(user_input, assistanId, assistantThreadId)
+    # assistant.deleteAllAssistants()
+    session_manager = SessionManager.get_session_manager_instance()
+    # user input
+    userResponse = request.values.get('Body', '').lower()
+    userId = request.values.get('From', None)
 
      # Check if the user is in the process of deleting specific emails
-    if session.get(userId) == 'deleting_specific_emails':
-        session[userId] = 'will_stop_app'
+    if session.get('status') == 'deleting_specific_emails':
+        session['status'] = 'will_stop_app'
+        gmail = Actions.get_instance()
         # Handle deletion of specific emails
         response.message(gmail.deleteSomeUnreadMessages(userResponse))
         # Reset the state
         response.message('Now remember to close the connection by sending me another message.') 
-    elif session.get(userId) == 'will_stop_app':
+    elif session.get('status') == 'will_stop_app':
+        server_manager = ServerManager.get_server_instance()
         # clearing the session - TODO: Is this really needed? Had issues before with the session sticking from previous runs. This seems to have been related to using the same
         # secret key for the session. I changed it to use a new random one on every run, and it seems to be working fine now.
         for key in list(session.keys()):
@@ -62,23 +48,35 @@ def bot():
             print('Deleting session key: ' + key)
             session.pop(key)
         server_manager.shutdown_flask()
+    elif session.get('status') == 'talking to assistant':
+        session['status'] = 'will_stop_app'
+        assistanId = session_manager.checkIfAgentInSession(userId)
+        assistantThreadId = session_manager.getAssistantThreadIdFromSession(userId)
+        assistantResponse = assistant.processUserInput(userResponse, assistanId, assistantThreadId)
+        response.message(assistantResponse)
+        # TODO: How do I leave this loop?
     else:
         match userResponse:
-            case '1':
-                # response.message('Respond with "yes" if you want to delete all unread messages.') 
-                # session[userId] = 'deleting_all_unread'
-                session[userId] = 'will_stop_app' 
+            case '1': 
+                session['status'] = 'will_stop_app' 
+                gmail = Actions.get_instance()
                 response.message(gmail.deleteAllUnreadMessages()) 
                 response.message('Now remember to close the connection by sending me another message.') 
             case '2':
                 # Keep specific unread messages
                 response.message('Give me the email addresses of the emails you want to keep separated by a comma') 
                 # Set the state
-                session[userId] = 'deleting_specific_emails' 
+                session['status'] = 'deleting_specific_emails' 
             case '3':
                 # Keep all the unread messages
-                session[userId] = 'will_stop_app'
+                session['status'] = 'will_stop_app'
                 response.message('All your unread messages will be kept. Now remember to close the connection by sending me another message.')
+            case '4':
+                # talk to assistant
+                session['status'] = 'talking to assistant'
+                session_manager.createSessionObjects(userId)
+                assistantResponse = assistant.startInteraction(userId, session_manager)
+                response.message(assistantResponse)
     return str(response)
 
 def runApp():
@@ -90,7 +88,7 @@ def initProcess():
     whatsApp = WhatsApp()
     gmail = Actions.get_instance()
     summary = gmail.getSummary()
-
+    
     sid = whatsApp.sendInitialMessage()
     if sid:
         logger.debug('Initial message sent!')
@@ -118,6 +116,7 @@ if __name__ == '__main__':
     logging.basicConfig(filename='emailWatcher.log', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
     logger = logging.getLogger('emailWatcher')
     server_manager = ServerManager()
+    session_manager = SessionManager()
 
     # Start ngrok tunnel
     #TODO: should I return proc or create a class and make it a property?
