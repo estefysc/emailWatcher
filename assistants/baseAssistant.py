@@ -21,9 +21,7 @@ class BaseAssistant(ABC):
     def _createAssistant(self, instruction):
         print("Creating assistant from BaseAssistant._createAssistant")
         assistant = self.client.beta.assistants.create(
-            # name="Grocery Inventory Assistant",
             name = self.name,
-            # instructions="You are a helpful assistant specialized in managing grocery inventories. If you interact with a user for the first time, You need to find out the consumption rate for all the items that the user consumes. You will calculate the consumption rates automatically. Ask for an item, how many were bought and then how many are left after a week. If this is not a first time user, then you will retrieve the consumption rate from the database. Ask if anything needs to be updated and generate a projected buying plan that minimizes waste.",
             instructions = instruction,
             tools = self.tools,
             model = self.model
@@ -35,7 +33,6 @@ class BaseAssistant(ABC):
         message = self.client.beta.threads.messages.create(
             thread_id = thread.id,
             role="user",
-            # content="Greet me as this is the first time you are talking to me. You need to find out my consumption rate for all the items that I consume. You will calculate my consumption rates automatically. Ask me for an item, how many I bought and then how many I have left after a week."
             content = userMessage
         )
         return thread.id
