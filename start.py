@@ -24,8 +24,6 @@ def bot():
     # creating response object - TwiML response object
     response = MessagingResponse()
     assistant = WhatsAssistant("Email Watcher Assistant")
-    # This block is for testing purposes only
-    # assistant.deleteAllAssistants()
     session_manager = SessionManager.get_session_manager_instance()
     # user input
     userResponse = request.values.get('Body', '').lower()
@@ -49,12 +47,16 @@ def bot():
             session.pop(key)
         server_manager.shutdown_flask()
     elif session.get('status') == 'talking to assistant':
-        session['status'] = 'will_stop_app'
-        assistanId = session_manager.checkIfAgentInSession(userId)
-        assistantThreadId = session_manager.getAssistantThreadIdFromSession(userId)
-        assistantResponse = assistant.processUserInput(userResponse, assistanId, assistantThreadId)
-        response.message(assistantResponse)
-        # TODO: How do I leave this loop?
+        if userResponse == 'exit':
+            session['status'] = 'will_stop_app'
+            response.message('Now remember to close the connection by sending me another message.')
+            assistant.deleteAllAssistants()
+        else:
+            assistanId = session_manager.checkIfAgentInSession(userId)
+            assistantThreadId = session_manager.getAssistantThreadIdFromSession(userId)
+            assistantResponse = assistant.processUserInput(userResponse, assistanId, assistantThreadId)
+            # print(assistantResponse)
+            response.message(assistantResponse)
     else:
         match userResponse:
             case '1': 

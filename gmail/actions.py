@@ -192,7 +192,7 @@ class Actions:
             return 'You have too many unread messages. The summary exceeds the maximum WhatsApp message size allowed.'
     
     def askForInstructions(self):
-        instructions = 'What would you like to do? Please respond with a number: 1 = Delete all unread messages, 2 = Delete some unread messages or 3 = Keep all unread messages.'
+        instructions = 'What would you like to do? Please respond with a number: 1 = Delete all unread messages, 2 = Delete some unread messages, 3 = Keep all unread messages, or 4 = Talk to assistant (if you no longer want to talk to the assistant, respond with "exit")'
         return instructions
     
     def deleteAllUnreadMessages(self):

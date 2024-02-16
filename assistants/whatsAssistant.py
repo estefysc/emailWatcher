@@ -2,7 +2,7 @@ from assistants.baseAssistant import BaseAssistant
 
 class WhatsAssistant(BaseAssistant):
     def startInteraction(self, userId, sessionManager):
-        instruction = "You are a helpful assistant specialized in managing an email account."
+        instruction = "You are a helpful assistant specialized in managing an email account. Make your responses short and concise, and do not exceed 4096 characters in your responses."
         assistantId = self._createAssistant(instruction)
         sessionManager.addAssistantIdToSession(userId, assistantId)
         userMessage = "Welcome me to the application."
