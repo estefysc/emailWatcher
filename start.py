@@ -50,13 +50,15 @@ def bot():
         if userResponse == 'exit':
             session['status'] = 'will_stop_app'
             response.message('Now remember to close the connection by sending me another message.')
+            print(response)
             assistant.deleteAllAssistants()
         else:
             assistanId = session_manager.checkIfAgentInSession(userId)
             assistantThreadId = session_manager.getAssistantThreadIdFromSession(userId)
             assistantResponse = assistant.processUserInput(userResponse, assistanId, assistantThreadId)
-            # print(assistantResponse)
-            response.message(assistantResponse)
+            print(assistantResponse)
+            print(response)
+            response.message('testing from start.py')
     else:
         match userResponse:
             case '1': 
@@ -79,6 +81,7 @@ def bot():
                 session_manager.createSessionObjects(userId)
                 assistantResponse = assistant.startInteraction(userId, session_manager)
                 response.message(assistantResponse)
+    # return response
     return str(response)
 
 def runApp():

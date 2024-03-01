@@ -2,6 +2,7 @@ import openai
 import os
 import time
 import requests
+import json
 
 from abc import ABC, abstractmethod
 from openai import OpenAI
@@ -12,11 +13,43 @@ from openai import OpenAI
 
 class BaseAssistant(ABC):
     def __init__(self, name, model="gpt-4-1106-preview"):
+        # function_json = {
+        #     "name": "display_quiz",
+        #     "description": "Displays a quiz to the student, and returns the student's response. A single quiz can have multiple questions.",
+        #     "parameters": {
+        #         "type": "object",
+        #         "properties": {
+        #             "title": {"type": "string"},
+        #             "questions": {
+        #                 "type": "array",
+        #                 "description": "An array of questions, each with a title and potentially options (if multiple choice).",
+        #                 "items": {
+        #                     "type": "object",
+        #                     "properties": {
+        #                         "question_text": {"type": "string"},
+        #                         "question_type": {
+        #                             "type": "string",
+        #                             "enum": ["MULTIPLE_CHOICE", "FREE_RESPONSE"],
+        #                         },
+        #                         "choices": {"type": "array", "items": {"type": "string"}},
+        #                     },
+        #                     "required": ["question_text"],
+        #                 },
+        #             },
+        #         },
+        #         "required": ["title", "questions"],
+        #     },
+        # }
+        get_summary_json = {
+            "name": "get_summary",
+            "description": "Obtains a summary of the user's unread emails. Returns a string. The string will contain the email address of the sender and how many emails from this sender are not read.",
+            "parameters": { "type": "object", "properties": {}, "required": [] }
+        }
         self.api_key = os.environ.get("OPENAI_API_KEY")
         self.client = OpenAI()
         self.name = name
         self.model = model
-        self.tools = [{"type": "code_interpreter"}]
+        self.tools = [{"type": "code_interpreter"}, {"type": "function", "function": get_summary_json}]
 
     def _createAssistant(self, instruction):
         print("Creating assistant from BaseAssistant._createAssistant")
@@ -52,13 +85,32 @@ class BaseAssistant(ABC):
         )
         return run
 
+    def _submitToolOutputs(self, threadId, runId, toolCallId, responses):
+        print("Submitting tool outputs")
+        run = self.client.beta.threads.runs.submit_tool_outputs(
+            thread_id=threadId,
+            run_id=runId,
+            tool_outputs=[
+                {
+                    "tool_call_id": toolCallId,
+                    "output": responses,
+                }
+            ],
+        )
+        print("Run after submitting tool outputs: ", run)
+        return run
+
     def _waitForRun(self, threadId, run):
+        print("Waiting for run")
+        print("This is the run: ", run)
+        print("This is the run status: ", run.status)
         while run.status == "queued" or run.status == "in_progress":
             run = self.client.beta.threads.runs.retrieve(
             thread_id = threadId,
             run_id = run.id
             )
         time.sleep(0.5)
+        print("Run after waiting: ", run)
         return run
 
     def _getAssistantResponse(self, threadId):
