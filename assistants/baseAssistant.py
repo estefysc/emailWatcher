@@ -97,20 +97,20 @@ class BaseAssistant(ABC):
                 }
             ],
         )
-        print("Run after submitting tool outputs: ", run)
+        # print("Run after submitting tool outputs: ", run)
         return run
 
     def _waitForRun(self, threadId, run):
         print("Waiting for run")
-        print("This is the run: ", run)
-        print("This is the run status: ", run.status)
+        # print("This is the run: ", run)
+        # print("This is the run status: ", run.status)
         while run.status == "queued" or run.status == "in_progress":
             run = self.client.beta.threads.runs.retrieve(
             thread_id = threadId,
             run_id = run.id
             )
         time.sleep(0.5)
-        print("Run after waiting: ", run)
+        # print("Run after waiting: ", run)
         return run
 
     def _getAssistantResponse(self, threadId):

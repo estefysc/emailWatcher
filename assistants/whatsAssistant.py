@@ -34,7 +34,7 @@ class WhatsAssistant(BaseAssistant):
         toolCallId = tool_call.id
         newRun2 = self._submitToolOutputs(modifiedThreadId, newRunId, toolCallId, responses)
         self._waitForRun(modifiedThreadId, newRun2)
-        response = 'This is a test response'
+        response = 'testing'
         # response = self._getAssistantResponse(modifiedThreadId)
         # print("Asistants final Response:", response)
         return response

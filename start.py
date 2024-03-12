@@ -27,7 +27,10 @@ def bot():
     session_manager = SessionManager.get_session_manager_instance()
     # user input
     userResponse = request.values.get('Body', '').lower()
+    print('User response: ' + userResponse)
     userId = request.values.get('From', None)
+    print('User ID: ' + userId)
+    print('Session: ' + str(session))
 
      # Check if the user is in the process of deleting specific emails
     if session.get('status') == 'deleting_specific_emails':
@@ -53,12 +56,17 @@ def bot():
             print(response)
             assistant.deleteAllAssistants()
         else:
+            print('Accessed talking to assistant')
             assistanId = session_manager.checkIfAgentInSession(userId)
+            print('Obtained assistantId = ' + assistanId)
             assistantThreadId = session_manager.getAssistantThreadIdFromSession(userId)
+            print('Obtained assistantThreadId = ' + assistantThreadId)
             assistantResponse = assistant.processUserInput(userResponse, assistanId, assistantThreadId)
+            print('Obtained Assistant response = ')
             print(assistantResponse)
+            print('This is the response object:')
+            response.message('testing from start')
             print(response)
-            response.message('testing from start.py')
     else:
         match userResponse:
             case '1': 
