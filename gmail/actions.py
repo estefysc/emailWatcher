@@ -219,6 +219,7 @@ class Actions:
         # Extracts the email addresses from the user's response. if email.strip() != '' is used to remove empty strings from the list
         emailsToKeep = [email.strip() for email in userResponse.split(',') if email.strip() != '']
         messageIdsToDelete = []
+        counter = 0
 
         for emailAddress, messages in self.__masterEmailDictionary.items():
             if emailAddress not in emailsToKeep:
@@ -228,12 +229,23 @@ class Actions:
             # suggested by copilot
             # if messageIdsToDelete is not empty
             if len(messageIdsToDelete) > 0:
-                results = self.service.users().messages().batchDelete(userId='me', body={'ids': messageIdsToDelete}).execute()
-                if not results:
-                    #TODO: Update the senders dictionary and the unreadMessages list??? WHAT ELSE NEEDS TO BE UPDATED AFTER DELETING SOME EMAILS?
+                for id in messageIdsToDelete:
+                    results = self.service.users().messages().trash(userId='me', id=id).execute()
+                    if results:
+                        counter += 1
+                #TODO: Update the senders dictionary and the unreadMessages list??? WHAT ELSE NEEDS TO BE UPDATED AFTER DELETING SOME EMAILS?
+                if counter == len(messageIdsToDelete):
                     return('I kept the emails that were sent from the email addresses you specified. The rest have been deleted.')
                 else:
-                    return('There was an error deleting your unread emails.')
+                    return('One or more messages could not be deleted.')
+                
+                # Batch delete does not send the emails to the trash. Emails are permanently deleted.
+                # results = self.service.users().messages().batchDelete(userId='me', body={'ids': messageIdsToDelete}).execute()
+                # if not results:
+                #     #TODO: Update the senders dictionary and the unreadMessages list??? WHAT ELSE NEEDS TO BE UPDATED AFTER DELETING SOME EMAILS?
+                #     return('I kept the emails that were sent from the email addresses you specified. The rest have been deleted.')
+                # else:
+                #     return('There was an error deleting your unread emails.')
             else:
                 return('You decided to keep the only unread email you had. I did not delete any emails.')
         except HttpError as error:
