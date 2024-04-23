@@ -196,17 +196,33 @@ class Actions:
         return instructions
     
     def deleteAllUnreadMessages(self):
+        # this code is having issues. not deleting all for some reason
+        message_ids = [message['id'] for message in self.__unreadMessages]
+        counter = 0
         try:
+            for id in message_ids:
+                results = self.service.users().messages().trash(userId='me', id=id).execute()
+                if results:
+                        counter += 1
+                
+                if counter == len(message_ids):
+                    # Update the senders dictionary and the unreadMessages list
+                    self.__unreadMessages.clear()
+                    self.__senders.clear()
+                    return('All your unread emails have been deleted.')
+                else:
+                    return('There was an error deleting your unread emails.')
+
             # suggested by copilot
-            results = self.service.users().messages().batchDelete(userId='me', body={'ids': [message['id'] for message in self.__unreadMessages]}).execute()
+            # results = self.service.users().messages().batchDelete(userId='me', body={'ids': [message['id'] for message in self.__unreadMessages]}).execute()
             
-            if not results:
-                # Update the senders dictionary and the unreadMessages list
-                self.__unreadMessages.clear()
-                self.__senders.clear()
-                return('All your unread emails have been deleted.')
-            else:
-                return('There was an error deleting your unread emails.')
+            # if not results:
+            #     # Update the senders dictionary and the unreadMessages list
+            #     self.__unreadMessages.clear()
+            #     self.__senders.clear()
+            #     return('All your unread emails have been deleted.')
+            # else:
+            #     return('There was an error deleting your unread emails.')
                 
         except HttpError as error:
             # TODO(developer) - Handle errors from gmail API.
