@@ -23,9 +23,10 @@ class WhatsApp:
     )
     return message.sid
 
-  def sendWhats(self, message):
+  def sendWhats(self, userResponse, logger):
+    logger.debug(f'Sending user response: {userResponse}')
     message = self.client.messages.create(
       from_=self.reader.get('MESSAGES', 'FROM_NUMBER'),
-      body=message,
+      body=userResponse,
       to=self.reader.get('MESSAGES', 'TO_NUMBER')
     )
