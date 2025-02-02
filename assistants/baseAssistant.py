@@ -3,7 +3,7 @@ import os
 import time
 import requests
 import json
-
+import configparser
 from abc import ABC, abstractmethod
 from openai import OpenAI
 
@@ -45,8 +45,11 @@ class BaseAssistant(ABC):
             "description": "Obtains a summary of the user's unread emails. Returns a string. The string will contain the email address of the sender and how many emails from this sender are not read.",
             "parameters": { "type": "object", "properties": {}, "required": [] }
         }
-        self.api_key = os.environ.get("OPENAI_API_KEY")
-        self.client = OpenAI()
+        config = configparser.ConfigParser()
+        config.read('config.cfg')
+        # self.api_key = os.environ.get("OPENAI_API_KEY")
+        self.api_key = config['OpenAI']['OPENAI_API_KEY']
+        self.client = OpenAI(api_key=self.api_key)
         self.name = name
         self.model = model
         self.tools = [{"type": "code_interpreter"}, {"type": "function", "function": get_summary_json}]
