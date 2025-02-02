@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
+
 from flask import Flask, request, session
 from twilio.twiml.messaging_response import MessagingResponse
-from tunnel.actions import startNgrok
+from tunnel.actions import startNgrok, getNgrokPid
 from gmail.actions import Actions
 from messages.whatsapp.send_whats import WhatsApp
 from server.actions import ServerManager
@@ -97,7 +99,7 @@ def runApp():
     app.secret_key = server_manager.generate_new_secret_key()
     app.run(port=8000, debug=False)
     
-def initProcess():
+def initProcess(logger):
     whatsApp = WhatsApp()
     gmail = Actions.get_instance()
     summary = gmail.getSummary()
@@ -106,8 +108,8 @@ def initProcess():
     if sid:
         logger.debug('Initial message sent!')
 
-    whatsApp.sendWhats(summary)
-    whatsApp.sendWhats(gmail.askForInstructions())
+    whatsApp.sendWhats(summary, logger)
+    whatsApp.sendWhats(gmail.askForInstructions(), logger)
 
 def test():
     gmail = Actions.get_instance()
@@ -134,10 +136,10 @@ if __name__ == '__main__':
     # Start ngrok tunnel
     #TODO: should I return proc or create a class and make it a property?
     startNgrok()
-    
+
     # Create threads
     appThread = threading.Thread(target=runApp)
-    initProcessThread = threading.Thread(target=initProcess)
+    initProcessThread = threading.Thread(target=initProcess, args=(logger,))
     monitorThread = threading.Thread(target=server_manager.monitor_shutdown_flag, args=(logger,))
 
     # Start Flask app
