@@ -3,6 +3,8 @@
 __pycache__/
 node_modules/
 archive/
+venv/
+.vscode/
 ```
 
 # Untracked files
@@ -10,6 +12,7 @@ archive/
 token.json
 credentials.json
 emailWatcher.log
+cronJob.log
 config.cfg
 NOTES.md
 ```
