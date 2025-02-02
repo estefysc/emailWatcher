@@ -27,8 +27,10 @@ class ServerManager:
         self.shutdown_flask_flag = True
 
     def monitor_shutdown_flag(self, logger):
+        logger.debug('---- Monitoring shutdown flag ----')
+        logger.debug(f'Shutdown flag: {self.shutdown_flask_flag}')
         while not self.shutdown_flask_flag:
-            time.sleep(1)
+            time.sleep(0.5)
         ngrokPidm = getNgrokPid(logger)
         closeNgrokConnection(logger, ngrokPidm)
         # will terminate the flask app
