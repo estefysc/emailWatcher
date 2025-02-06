@@ -9,6 +9,7 @@ from openai import OpenAI
 
 class BaseAssistant(ABC):
     def __init__(self, name, model="gpt-4-1106-preview"):
+    # def __init__(self, name, model="gpt-4o-mini-2024-07-18"):
         # Note: To see the complete structure of a tool function, see the notes.md file.
         get_summary_json = {
             "name": "get_summary",
@@ -46,23 +47,9 @@ class BaseAssistant(ABC):
         print("from baseAssistant._createAssistant: This is the assistantID: ", assistant.id, "\n")
         return assistant.id
 
-    # def _createThread(self, userMessage):
     def _createThread(self):
         thread = self.client.beta.threads.create()
-        # message = self.client.beta.threads.messages.create(
-        #     thread_id = thread.id,
-        #     role="user",
-        #     content = userMessage
-        # )
         return thread.id
-    
-    # def _modifyThread(self, threadId, userMessage):
-    #     message = self.client.beta.threads.messages.create(
-    #         thread_id = threadId,
-    #         role="user",
-    #         content = userMessage
-    #     )
-    #     return threadId
 
     def _addMessageToThread(self, threadId, userMessage):
         message = self.client.beta.threads.messages.create(
@@ -160,17 +147,3 @@ class BaseAssistant(ABC):
     def getListOfAssistants(self):
         list = self._listAssistants()
         print("Assistant list: ", list)
-
-    # def create_assistant(name, instructions, tools, model):
-    #     assistant = client.beta.assistants.create(
-    #         name=name,
-    #         instructions=instructions,
-    #         tools=tools,
-    #         model=model
-    #     )
-    #     return assistant.id  # Return the assistant ID
-
-    # Note: I think this function was created for testing purposes. Self is not being used and client is. 
-    # def selectAssistant(assistant_id):
-    #     assistant = client.beta.assistants.retrieve(assistant_id)
-    #     return assistant.id
