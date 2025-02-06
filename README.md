@@ -5,9 +5,10 @@ This application is a WhatsApp-based email management system that uses Ngrok, Fl
 At startup, the application will obtain a summary of the user's unread emails and send it to the user via WhatsApp (using a Twilio sandbox number), along with a prompt asking how they would like to proceed: keep all emails, delete all emails, or keep emails from a specific sender.
 
 ## Startup Sequence
+### Tunnel Creation
 1. An ngrok tunnel is established to make the local Flask server publicly accessible for Twilio webhooks.
 
-### Threading Structure
+### Thread Creation
 The application runs on three main threads:
 1. `appThread`: Flask web server (Port 8000)
 2. `initProcessThread`: Initial setup and user communication
