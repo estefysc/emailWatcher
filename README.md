@@ -14,7 +14,7 @@ The application runs on three main threads:
 2. `initProcessThread`: Initial setup and user communication
 3. `monitorThread`: Shutdown signal monitoring
 
-### Message Flow
+## Message Flow
 
 #### Outbound Messages (App → User)
 The app directly calls Twilio's API using Twilio's client libraries/SDK. These requests go straight to Twilio's servers using Twilio's public API endpoints. Twilio then handles delivering the message to WhatsApp. These outbound requests don't need the tunnel as  they're standard HTTP requests to Twilio's public API endpoints.
