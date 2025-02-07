@@ -58,7 +58,6 @@ class BaseAssistant(ABC):
             content = userMessage
         )
         print("from baseAssistant._addMessageToThread: This is the message: ", message, "\n")
-        return threadId
 
     def _triggerAssistant(self, threadId, assistantId):
         run = self.client.beta.threads.runs.create(
@@ -68,7 +67,7 @@ class BaseAssistant(ABC):
         print("from baseAssistant._triggerAssistant: This is the run: ", run, "\n")
         return run
 
-    def _submitToolOutputs(self, threadId, runId, toolCallId, responses):
+    def _submitToolOutputs(self, threadId, runId, toolCallId, functionOutput):
         print("Submitting tool outputs\n")
         run = self.client.beta.threads.runs.submit_tool_outputs(
             thread_id=threadId,
@@ -76,7 +75,7 @@ class BaseAssistant(ABC):
             tool_outputs=[
                 {
                     "tool_call_id": toolCallId,
-                    "output": responses,
+                    "output": functionOutput,
                 }
             ],
         )
