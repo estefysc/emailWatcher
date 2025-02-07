@@ -123,7 +123,7 @@ class BaseAssistant(ABC):
         HEADERS = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}",  
-            "OpenAI-Beta": "assistants=v1"
+            "OpenAI-Beta": "assistants=v2"
         }
         delete_url = f"https://api.openai.com/v1/assistants/{assistant_id}"
         response = requests.delete(delete_url, headers=HEADERS)
