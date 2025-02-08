@@ -25,11 +25,11 @@ class Actions:
     def __init__(self):
         if Actions._instance is None:
             # This is a list of dictionaries - unreadMessage object = {'id': '1899df5996b78573', 'threadId': '1899df5996b78573'} 
-            self.__unreadMessages = []
+            self._unreadMessages = []
             # TODO: delete? Currently not used
-            self.__idEmailMap = {}
+            self._idEmailMap = {}
             # This is a dictionary with the senders' email address as the key and the amount of emails as the value
-            self.__senders = {}
+            self._senders = {}
             # This is a list of dictionaries that follows the below structure
             # self.__masterEmailDictionary = {
             #     "alice@example.com": [
@@ -38,7 +38,7 @@ class Actions:
             #     ],
             #     # ...
             # }
-            self.__masterEmailDictionary = {}
+            self._masterEmailDictionary = {}
 
             # If modifying these scopes, delete the file token.json.
             SCOPES = ['https://mail.google.com/']
@@ -92,7 +92,7 @@ class Actions:
         else:
             raise Exception("You cannot create another Actions class")
 
-    def __extract_email_address(self, input_string):
+    def _extract_email_address(self, input_string):
         # Define the regular expression pattern to match an email address
         email_pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
 
@@ -102,14 +102,14 @@ class Actions:
         # If a match is found, return the email address; otherwise, return None
         return match.group() if match else None
     
-    def __insertIntoMasterEmailDictionary(self, fromEmail, messageId, subjectLine):
-        if self.__masterEmailDictionary.get(fromEmail, None) is None:
-            self.__masterEmailDictionary[fromEmail] = []
+    def _insertIntoMasterEmailDictionary(self, fromEmail, messageId, subjectLine):
+        if self._masterEmailDictionary.get(fromEmail, None) is None:
+            self._masterEmailDictionary[fromEmail] = []
         
         messageDictionary = {"msgId": messageId, "subject": subjectLine}
-        self.__masterEmailDictionary[fromEmail].append(messageDictionary)
+        self._masterEmailDictionary[fromEmail].append(messageDictionary)
 
-    def __insertIntoSenders(self, messageId):
+    def _insertIntoSenders(self, messageId):
         """
         Populates the senders dictionary. It also calls the function that populates the masterEmailDictionary and the idEmailMap.
         """
@@ -127,20 +127,20 @@ class Actions:
                 if header['name'] == 'Subject':
                     subjectHeader = header
                     
-            fromEmail = self.__extract_email_address(fromHeader['value']).lower()
+            fromEmail = self._extract_email_address(fromHeader['value']).lower()
             subjectLine = subjectHeader['value']
-            self.__insertIntoIdEmailMap(messageId, fromEmail)
-            self.__senders[fromEmail] = self.__senders.get(fromEmail, 0) + 1
-            self.__insertIntoMasterEmailDictionary(fromEmail, messageId, subjectLine)
+            self._insertIntoIdEmailMap(messageId, fromEmail)
+            self._senders[fromEmail] = self._senders.get(fromEmail, 0) + 1
+            self._insertIntoMasterEmailDictionary(fromEmail, messageId, subjectLine)
 
         except HttpError as error:
             # TODO(developer) - Handle errors from gmail API.
             print(f'An error occurred: {error}')
     
-    def __insertIntoIdEmailMap(self, messageId, fromEmail):
-        self.__idEmailMap[messageId] = fromEmail
+    def _insertIntoIdEmailMap(self, messageId, fromEmail):
+        self._idEmailMap[messageId] = fromEmail
 
-    def __getUnreadMessages(self):
+    def _getUnreadMessages(self):
         """
         This function populates the self.__unreadMessages variable and returns the amount of unread messages. It also calls the function that
         populates the self.__senders dictionary
@@ -149,13 +149,13 @@ class Actions:
         try:
             # Get all unread messages
             results = self.service.users().messages().list(userId='me', labelIds=['UNREAD'], maxResults=30).execute()
-            self.__unreadMessages = results.get('messages', [])
+            self._unreadMessages = results.get('messages', [])
            
-            if not self.__unreadMessages:
+            if not self._unreadMessages:
                 print ('No new messages found.')
             else:
-                for message in self.__unreadMessages:
-                    self.__insertIntoSenders(message['id'])
+                for message in self._unreadMessages:
+                    self._insertIntoSenders(message['id'])
                     amountOfUnreadMessages += 1
             
         except HttpError as error:
@@ -166,11 +166,11 @@ class Actions:
     
     def getProperty(self, property):
         if property == 'unreadMessages':
-            return self.__unreadMessages
+            return self._unreadMessages
         elif property == 'senders':
-            return self.__senders
+            return self._senders
         elif property == 'idEmailMap':
-            return self.__idEmailMap
+            return self._idEmailMap
         else:
             return None
     
@@ -178,8 +178,8 @@ class Actions:
         """
         After the class is instantiated, this function should be called to kick off the process of getting the unread messages
         """
-        amountUnread  = self.__getUnreadMessages()
-        unreadReport = self.__senders
+        amountUnread  = self._getUnreadMessages()
+        unreadReport = self._senders
         filteredReport = ''
 
         for key, value in unreadReport.items():
@@ -197,7 +197,7 @@ class Actions:
     
     def deleteAllUnreadMessages(self):
         # this code is having issues. not deleting all for some reason
-        message_ids = [message['id'] for message in self.__unreadMessages]
+        message_ids = [message['id'] for message in self._unreadMessages]
         counter = 0
         try:
             for id in message_ids:
@@ -207,8 +207,8 @@ class Actions:
                 
                 if counter == len(message_ids):
                     # Update the senders dictionary and the unreadMessages list
-                    self.__unreadMessages.clear()
-                    self.__senders.clear()
+                    self._unreadMessages.clear()
+                    self._senders.clear()
                     return('All your unread emails have been deleted.')
                 else:
                     return('There was an error deleting your unread emails.')
@@ -237,7 +237,7 @@ class Actions:
         messageIdsToDelete = []
         counter = 0
 
-        for emailAddress, messages in self.__masterEmailDictionary.items():
+        for emailAddress, messages in self._masterEmailDictionary.items():
             if emailAddress not in emailsToKeep:
                 messageIdsToDelete.extend([message['msgId'] for message in messages])
 
