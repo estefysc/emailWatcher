@@ -36,28 +36,8 @@ class WhatsAssistant(BaseAssistant):
         # print("This is processedRun: " + str(processedRun))
 
         if processedRun.required_action is not None:
-            # print("Accessed required action")
-            tool_call = processedRun.required_action.submit_tool_outputs.tool_calls[0]
-            # print("This is tool call: " + str(tool_call))
-            tool_name = tool_call.function.name
-            # print("Tool name repr:", repr(tool_name))  # Shows exact string representation
-            # print("Tool name is:", tool_name)  
+            self.executeTool(processedRun, threadId)
 
-            if tool_name == "get_summary":
-                # print("Entering if branch")  
-                contextOutput = self.getEmailSummary()
-            elif tool_name == "get_generic":
-                # print("Entering elif branch get_generic")
-                contextOutput = self.getGenericResponse()
-
-            toolCallId = tool_call.id
-            runAfterToolExecution = self._submitToolOutputs(threadId, processedRun.id, toolCallId, contextOutput)
-            # print("This is runAfterToolExecution: " + str(runAfterToolExecution))
-            self._waitForRun(threadId, runAfterToolExecution)
-        # else:
-        #     # print("Entering else branch") 
-        #     contextOutput = "reply with something generic"
-        
         response = self._getAssistantResponse(threadId)
         # print("Asistants final Response:", response)
         return response
@@ -71,6 +51,25 @@ class WhatsAssistant(BaseAssistant):
     def getGenericResponse(self):
         print("Getting generic response")
         return "reply with something generic"
+    
+    def executeTool(self, processedRun, threadId):
+        tool_call = processedRun.required_action.submit_tool_outputs.tool_calls[0]
+        # print("This is tool call: " + str(tool_call))
+        tool_name = tool_call.function.name
+        # print("Tool name repr:", repr(tool_name))  # Shows exact string representation
+        # print("Tool name is:", tool_name)  
+
+        if tool_name == "get_summary":
+            # print("Entering if branch")  
+            contextOutput = self.getEmailSummary()
+        elif tool_name == "get_generic":
+            # print("Entering elif branch get_generic")
+            contextOutput = self.getGenericResponse()
+
+        toolCallId = tool_call.id
+        runAfterToolExecution = self._submitToolOutputs(threadId, processedRun.id, toolCallId, contextOutput)
+        # print("This is runAfterToolExecution: " + str(runAfterToolExecution))
+        self._waitForRun(threadId, runAfterToolExecution)
     
     
     
