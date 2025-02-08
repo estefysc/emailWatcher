@@ -15,10 +15,59 @@ The application runs on three main threads:
 3. `monitorThread`: Shutdown signal monitoring
 
 ## Message Flow
-
 #### Outbound Messages (App → User)
 The app directly calls Twilio's API using Twilio's client libraries/SDK. These requests go straight to Twilio's servers using Twilio's public API endpoints. Twilio then handles delivering the message to WhatsApp. These outbound requests don't need the tunnel as  they're standard HTTP requests to Twilio's public API endpoints.
 
 #### Inbound Messages (User → App)
 When a user sends a WhatsApp message responding to the application, the message goes to 
 Twilio, which needs to forward this message to the app via a webhook. The ngrok tunnel creates a secure encrypted tunnel between the local development machine and the ngrok service, which then provides a public URL that can be used to receive Twilio's webhooks. 
+
+## Configuration
+### Environment Variables
+The application uses a `config.cfg` file to manage environment variables and sensitive credentials. This file should be kept secure and never committed to version control.
+
+### Required Configuration
+Create a `config.cfg` file in the root directory with the following structure:
+
+```ini
+[NGROK]
+DOMAIN = your-ngrok-domain.ngrok-free.app
+
+[WHATSAPP]
+ACCOUNT_SID = your-twilio-account-sid
+AUTH_TOKEN = your-twilio-auth-token
+
+[MESSAGES]
+FROM_NUMBER = whatsapp:+1234567890
+TO_NUMBER = whatsapp:+1234567890
+
+[OpenAI]
+OPENAI_API_KEY = your-openai-api-key
+```
+
+### Variable Descriptions
+#### NGROK Configuration
+- `DOMAIN`: Your ngrok domain for webhook endpoints. Obtained from ngrok dashboard after starting a tunnel.
+
+#### WhatsApp Configuration (via Twilio)
+- `ACCOUNT_SID`: Your Twilio Account SID found in Twilio Console
+- `AUTH_TOKEN`: Your Twilio Auth Token found in Twilio Console
+- Both credentials can be found at: https://console.twilio.com/
+
+#### Message Settings
+- `FROM_NUMBER`: Your Twilio WhatsApp number (format: whatsapp:+1234567890)
+- `TO_NUMBER`: Default recipient WhatsApp number (format: whatsapp:+1234567890)
+
+#### OpenAI Configuration
+- `OPENAI_API_KEY`: Your OpenAI API key for AI functionality. 
+
+### Authentication
+#### token.json
+The `token.json` file is used to store OAuth 2.0 credentials for Gmail API authentication:
+
+- This file contains the user's access and refresh tokens
+- It is automatically created during the first authorization flow
+- If you encounter an `invalid_grant: Token has been expired or revoked` error:
+  1. Delete the existing `token.json` file
+  2. Restart the application
+  3. A new authorization flow will begin and create a fresh `token.json`
