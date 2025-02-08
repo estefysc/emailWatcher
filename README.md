@@ -52,11 +52,10 @@ OPENAI_API_KEY = your-openai-api-key
 #### WhatsApp Configuration (via Twilio)
 - `ACCOUNT_SID`: Your Twilio Account SID found in Twilio Console
 - `AUTH_TOKEN`: Your Twilio Auth Token found in Twilio Console
-- Both credentials can be found at: https://console.twilio.com/
 
 #### Message Settings
-- `FROM_NUMBER`: Your Twilio WhatsApp number (format: whatsapp:+1234567890)
-- `TO_NUMBER`: Default recipient WhatsApp number (format: whatsapp:+1234567890)
+- `FROM_NUMBER`: Your Twilio WhatsApp sandbox number (format: whatsapp:+1234567890)
+- `TO_NUMBER`: Your personal WhatsApp number that will receive the messages (format: whatsapp:+1234567890)
 
 #### OpenAI Configuration
 - `OPENAI_API_KEY`: Your OpenAI API key for AI functionality. 
