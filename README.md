@@ -47,7 +47,7 @@ OPENAI_API_KEY = your-openai-api-key
 
 ### Variable Descriptions
 #### NGROK Configuration
-- `DOMAIN`: Your ngrok domain for webhook endpoints. Obtained from ngrok dashboard after starting a tunnel.
+- `DOMAIN`: Your ngrok domain for webhook endpoints. Obtained from the ngrok dashboard.
 
 #### WhatsApp Configuration (via Twilio)
 - `ACCOUNT_SID`: Your Twilio Account SID found in Twilio Console
